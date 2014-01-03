@@ -71,6 +71,8 @@ class AlarmEditorWindow(QDialog):
         self.nonactive.itemClicked.connect(self.tableClicked)
         self.populateTables()
         self.addAlarmName = QLineEdit()
+        self.addAlarmName.setPlaceholderText("Alarm Name")
+
         self.addAlarmTime = QTimeEdit()
         self.addAlarmTime.setTime(QTime.currentTime())
         self.addAlarmButton = QPushButton("Add Alarm")
@@ -94,6 +96,7 @@ class AlarmEditorWindow(QDialog):
         vlayout.addLayout(addalarmlayout)
         vlayout.addWidget(self.startAlarmsButton)
         self.setLayout(vlayout)
+        self.setWindowTitle("Smart Alarm")
     def getSelectedName(self, buttonname):
         if(buttonname == self.removeNonActiveAlarmButton):
             row =self.nonactive.selectedIndexes()[0].row()
@@ -114,7 +117,7 @@ class AlarmEditorWindow(QDialog):
             tableobj.setItem(i, 1, QTableWidgetItem(k[1]))
 
     def addAlarm(self):
-        if self.addAlarmCheck.isChecked() is False:
+        if self.addAlarmCheck.isChecked() is True:
             self.alarms.addActiveAlarm(self.addAlarmName.text(), str(self.addAlarmTime.time().toString()))
         else:
             self.alarms.addNonActiveAlarm(self.addAlarmName.text(), str(self.addAlarmTime.time().toString()))
