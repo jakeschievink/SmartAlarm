@@ -1,4 +1,5 @@
 import json 
+from main import *
 import shelve
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
@@ -28,12 +29,23 @@ class AlarmHandler():
         del self.alarmsDict["active"][str(name)]
         self.writeAlarmsToJson()
     def removeAlarm(self, name):
-        del self.alarmsDict["nonactive"][str(name)]
+        del self.alarmsDict["active"][str(name)]
         self.writeAlarmsToJson()
     def writeAlarmsToJson(self):
         print "dumping", self.alarmsDict
         with open('alarms.json', 'w') as f:
             json.dump(self.alarmsDict, f)
+    def strtoIntTime(self, tobj):
+        return int(tobj.replace(':',''))
+    def getClosestTime(self):
+        cur = self.strtoIntTime(str(QTime.currentTime().toString()))
+        print "current time:", cur
+        nlist = [abs(cur-self.strtoIntTime(k)) for i, k in self.alarmsDict["active"].iteritems()]
+        print "list with difference", nlist
+        closestAlarm = list(self.alarmsDict["active"].iteritems())[nlist.index(min(nlist))][0]
+        closestTime = self.alarmsDict["active"][closestAlarm]
+        print "cat",closestTime
+        return closestTime
 
 class AlarmEditorWindow(QDialog):
     def __init__(self, input_dict):
@@ -49,6 +61,7 @@ class AlarmEditorWindow(QDialog):
         self.nonactive.setSelectionBehavior(self.nonactive.SelectRows)
         self.nonactive.setSelectionMode(self.nonactive.SingleSelection) 
         self.removeAlarmButton = QPushButton("Remove")
+        self.active.itemClicked.connect(self.removeAlarmButton.show)
         self.nonactive.itemClicked.connect(self.removeAlarmButton.show)
         self.populateTables()
         self.addAlarmName = QLineEdit()
@@ -57,6 +70,8 @@ class AlarmEditorWindow(QDialog):
         self.addAlarmCheck = QCheckBox("Activate?")
         self.addAlarmButton.clicked.connect(self.addAlarm)
         self.removeAlarmButton.clicked.connect(self.removeAlarm)
+        self.startAlarmsButton = QPushButton("Start Alarms")
+        self.startAlarmsButton.clicked.connect(self.startAlarms)
         tablelayout.addWidget(self.active, 0,0)
         tablelayout.addWidget(self.nonactive, 0, 1)
         addalarmlayout.addWidget(self.addAlarmName, 0, 1)
@@ -67,10 +82,11 @@ class AlarmEditorWindow(QDialog):
         vlayout.addWidget(self.removeAlarmButton)
         self.removeAlarmButton.hide()
         vlayout.addLayout(addalarmlayout)
+        vlayout.addWidget(self.startAlarmsButton)
         self.setLayout(vlayout)
     def getSelectedName(self):
-        row =self.nonactive.selectedIndexes()[0].row()
-        return self.nonactive.item(row, 0).text()
+        row =self.active.selectedIndexes()[0].row()
+        return self.active.item(row, 0).text()
     def populateTables(self):
         self.populateTable(self.nonactive, self.alarms.alarmsDict["nonactive"])
         self.populateTable(self.active, self.alarms.alarmsDict["active"])
@@ -81,6 +97,7 @@ class AlarmEditorWindow(QDialog):
         for i, k in enumerate(alarmobj.iteritems()):
             tableobj.setItem(i, 0, QTableWidgetItem(k[0]))
             tableobj.setItem(i, 1, QTableWidgetItem(k[1]))
+
     def addAlarm(self):
         if self.addAlarmCheck.isChecked() is False:
             self.alarms.addActiveAlarm(self.addAlarmName.text(), str(self.addAlarmTime.time().toString()))
@@ -90,6 +107,13 @@ class AlarmEditorWindow(QDialog):
     def removeAlarm(self, name):
         self.alarms.removeAlarm(self.getSelectedName())
         self.populateTables()
+    def startAlarms(self):
+        closestTime = self.alarms.getClosestTime().split(":")
+        print "CT", closestTime
+        self.aw = AlarmWindow(QTime(int(closestTime[0]), int(closestTime[1])))
+        self.aw.sleepyTime()
+
+
 
 
 

@@ -34,6 +34,14 @@ class Speaker(QThread):
         while True:
             self.speakTrivia()
 
+class Waiter(QThread):
+    def __init__(self, time):
+        QThread.__init__(self)
+        self.time = time 
+    def run(self):
+        aw = AlarmWindow(self.time)
+        aw.sleepyTime()
+        
 
 class AlarmWindow(QDialog):
     def __init__(self, alarmTime):
@@ -48,23 +56,16 @@ class AlarmWindow(QDialog):
         self.setWindowFlags(Qt.SplashScreen)
         self.stopButton.clicked.connect(self.closeAll)
         self.s = Speaker()
+
     def closeAll(self):
         self.s.terminate()
         self.hide()
 
     def sleepyTime(self):
+        print "Got alarmtime", self.alarmTime.toString()
         while QTime.currentTime() < self.alarmTime:
             print "sleeping %r", QTime.currentTime()
+            time.sleep(20)
         self.show()
         self.s.start()
-
-    
-
-if __name__ == '__main__':
-    app = QApplication(sys.argv)
-    window = AlarmWindow(QTime(13, 32))   
-    window.sleepyTime()
-    app.exec_()
-
-
 
