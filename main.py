@@ -8,14 +8,6 @@ from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 
 
-class FlashParser():
-    def __init__(self, ffile):
-        self.f = open(ffile, 'r')
-        self.f = self.f.read()
-    def parseFlash(self):
-        return [i.split('---') for i in self.f.splitlines()]
-    def getChoice(self):
-        return random.choice(self.parseFlash())
 
 class Speaker(QThread):
     def __init__(self):
