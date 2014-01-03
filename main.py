@@ -44,12 +44,11 @@ class Waiter(QThread):
         
 
 class AlarmWindow(QDialog):
-    def __init__(self, alarmTime):
+    def __init__(self):
         super(AlarmWindow, self).__init__()
         layout = QVBoxLayout()
         self.alarmText = QLabel("<font size=800>Wake Up</font>")
         self.stopButton = QPushButton("stop")
-        self.alarmTime = alarmTime
         layout.addWidget(self.alarmText)
         layout.addWidget(self.stopButton)
         self.setLayout(layout)
@@ -61,7 +60,8 @@ class AlarmWindow(QDialog):
         self.s.terminate()
         self.hide()
 
-    def sleepyTime(self):
+    def sleepyTime(self, alarmTime):
+        self.alarmTime = alarmTime
         print "Got alarmtime", self.alarmTime.toString()
         while QTime.currentTime() < self.alarmTime:
             print "sleeping %r", QTime.currentTime()
