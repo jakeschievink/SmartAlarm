@@ -2,7 +2,7 @@
 import signal
 signal.signal(signal.SIGINT, signal.SIG_DFL)
 from espeak import espeak
-import random
+from FlashCards import *
 import time, sys
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
@@ -13,7 +13,7 @@ class Speaker(QThread):
     def __init__(self):
         QThread.__init__(self)
         self.delay = 5
-        self.fp = FlashParser("trivia.txt")
+        self.fp = FlashParser("U.S. State Capitals.json")
     def speakTrivia(self):
         trivia = self.fp.getChoice()
         espeak.set_voice("mb-us2")
@@ -25,15 +25,6 @@ class Speaker(QThread):
     def run(self):
         while True:
             self.speakTrivia()
-
-class Waiter(QThread):
-    def __init__(self, time):
-        QThread.__init__(self)
-        self.time = time 
-    def run(self):
-        aw = AlarmWindow(self.time)
-        aw.sleepyTime()
-        
 
 class AlarmWindow(QDialog):
     def __init__(self):
