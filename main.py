@@ -10,10 +10,10 @@ from PyQt4.QtGui import *
 
 
 class Speaker(QThread):
-    def __init__(self):
+    def __init__(self, flashset):
         QThread.__init__(self)
         self.delay = 5
-        self.fp = FlashParser("U.S. State Capitals.json")
+        self.fp = FlashParser(flashset)
     def speakTrivia(self):
         trivia = self.fp.getChoice()
         espeak.set_voice("mb-us2")
@@ -37,18 +37,19 @@ class AlarmWindow(QDialog):
         self.setLayout(layout)
         self.setWindowFlags(Qt.SplashScreen)
         self.stopButton.clicked.connect(self.closeAll)
-        self.s = Speaker()
 
     def closeAll(self):
+        self.emit(SIGNAL('AlarmClosed'))
         self.s.terminate()
         self.hide()
 
-    def sleepyTime(self, alarmTime):
+    def sleepyTime(self, alarmTime,flashset):
         self.alarmTime = alarmTime
         print "Got alarmtime", self.alarmTime.toString()
         while QTime.currentTime() < self.alarmTime:
             print "sleeping %r", QTime.currentTime()
             time.sleep(20)
+        self.s = Speaker(flashset)
         self.show()
         self.s.start()
 
